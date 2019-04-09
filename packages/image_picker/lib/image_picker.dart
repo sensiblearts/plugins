@@ -74,11 +74,11 @@ class ImagePicker {
             : File(pickedPath["original"]),
         scaled:
             pickedPath["scaled"] == null ? null : File(pickedPath["scaled"]),
-        video: pickedPath["video"] == null ? null : File(pickedPath["video"]));
+        video: null);
     return pf;
   }
 
-  static Future<File> pickVideo({
+  static Future<PickedFile> pickVideo({
     @required ImageSource source,
   }) async {
     assert(source != null);
@@ -86,12 +86,17 @@ class ImagePicker {
     // TODO(amirh): remove this on when the invokeMethod update makes it to stable Flutter.
     // https://github.com/flutter/flutter/issues/26431
     // ignore: strong_mode_implicit_dynamic_method
-    final String path = await _channel.invokeMethod(
+    final Map<dynamic, dynamic> pickedPath = await _channel.invokeMethod(
       'pickVideo',
       <String, dynamic>{
         'source': source.index,
       },
     );
-    return path == null ? null : File(path);
+
+    final PickedFile pf = PickedFile(
+        original: null,
+        scaled: null,
+        video: pickedPath["video"] == null ? null : File(pickedPath["video"]));
+    return pf;
   }
 }
