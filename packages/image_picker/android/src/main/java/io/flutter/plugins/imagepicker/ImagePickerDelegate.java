@@ -371,6 +371,12 @@ public class ImagePickerDelegate
   private void handleChooseImageResult(int resultCode, Intent data) {
     if (resultCode == Activity.RESULT_OK && data != null) {
       String path = fileUtils.getPathFromUri(activity, data.getData());
+      // per: https://github.com/flutter/flutter/issues/29594 :
+      if (path==null || !(new File(path).canRead() )) {
+        finishWithError("ACCESS_ERROR",
+            "Can't read your photo. Please pick one in the gallery, not in other folders such as downloads. Some Android versions mishandle those folders.");
+        return;
+      }
       handleImageResult(path, false);
       return;
     }
