@@ -22,6 +22,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
+import java.util.Map;
+import java.util.HashMap;
 
 /**
  * A delegate class doing the heavy lifting for the plugin.
@@ -430,9 +432,20 @@ public class ImagePickerDelegate
       Double maxHeight = methodCall.argument("maxHeight");
 
       String finalImagePath = imageResizer.resizeImageIfNeeded(path, maxWidth, maxHeight);
-      finishWithSuccess(finalImagePath);
-
-      //delete original file if scaled
+      
+      Map<String, String> pickedMap = new HashMap<String, String>();
+      if (maxHeight == null && maxWidth == null) { // not scaled
+        pickedMap.put("original", finalImagePath);
+        pickedMap.put("scaled", null);
+      } else { // scaled
+        pickedMap.put("scaled", finalImagePath);
+        if (!shouldDeleteOriginalIfScaled) {
+          pickedMap.put("original", path);     
+        }
+      }
+      finishWithSuccess(pickedMap);
+                     
+      //delete original file if scaled AND shouldDeleteOriginalIfScaled
       if (!finalImagePath.equals(path) && shouldDeleteOriginalIfScaled) {
         new File(path).delete();
       }
@@ -443,7 +456,9 @@ public class ImagePickerDelegate
 
   private void handleVideoResult(String path) {
     if (pendingResult != null) {
-      finishWithSuccess(path);
+      Map<String, String> pickedMap = new HashMap<String, String>();
+      pickedMap.put("video", path);
+      finishWithSuccess(pickedMap);
     } else {
       throw new IllegalStateException("Received video from picker that was not requested");
     }
@@ -460,7 +475,7 @@ public class ImagePickerDelegate
     return true;
   }
 
-  private void finishWithSuccess(String imagePath) {
+  private void finishWithSuccess(Map<String,String> imagePath) {
     pendingResult.success(imagePath);
     clearMethodCallAndResult();
   }

@@ -17,6 +17,13 @@ enum ImageSource {
   gallery,
 }
 
+class PickedFile {
+  PickedFile({this.original, this.scaled, this.video});
+  File original;
+  File scaled;
+  File video;
+}
+
 class ImagePicker {
   static const MethodChannel _channel =
       MethodChannel('plugins.flutter.io/image_picker');
@@ -32,7 +39,7 @@ class ImagePicker {
   /// If the image is captured with a camera AND scaled (by maxHeight or maxWidth)
   /// then the original (non-scaled) image will be deleted only if
   /// [deleteCapturedOriginalIfScaled] == true.
-  static Future<File> pickImage({
+  static Future<PickedFile> pickImage({
     @required ImageSource source,
     double maxWidth,
     double maxHeight,
@@ -51,7 +58,7 @@ class ImagePicker {
     // TODO(amirh): remove this on when the invokeMethod update makes it to stable Flutter.
     // https://github.com/flutter/flutter/issues/26431
     // ignore: strong_mode_implicit_dynamic_method
-    final String path = await _channel.invokeMethod(
+    final Map<dynamic, dynamic> pickedPath = await _channel.invokeMethod(
       'pickImage',
       <String, dynamic>{
         'source': source.index,
@@ -61,7 +68,14 @@ class ImagePicker {
       },
     );
 
-    return path == null ? null : File(path);
+    final PickedFile pf = PickedFile(
+        original: pickedPath["original"] == null
+            ? null
+            : File(pickedPath["original"]),
+        scaled:
+            pickedPath["scaled"] == null ? null : File(pickedPath["scaled"]),
+        video: pickedPath["video"] == null ? null : File(pickedPath["video"]));
+    return pf;
   }
 
   static Future<File> pickVideo({
