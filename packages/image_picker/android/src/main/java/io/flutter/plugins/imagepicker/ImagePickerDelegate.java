@@ -436,6 +436,8 @@ public class ImagePickerDelegate
     if (pendingResult != null) {
       Double maxWidth = methodCall.argument("maxWidth");
       Double maxHeight = methodCall.argument("maxHeight");
+      // Double maxWidth = 600.0; // methodCall.argument("maxWidth");
+      // Double maxHeight = null; // methodCall.argument("maxHeight");
 
       String finalImagePath = imageResizer.resizeImageIfNeeded(path, maxWidth, maxHeight);
       

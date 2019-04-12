@@ -9,6 +9,7 @@ import android.graphics.BitmapFactory;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
+// import java.io.FileInputStream;
 import java.io.IOException;
 
 class ImageResizer {
@@ -45,6 +46,10 @@ class ImageResizer {
 
   private File resizedImage(String path, Double maxWidth, Double maxHeight) throws IOException {
     Bitmap bmp = BitmapFactory.decodeFile(path);
+    // FileInputStream  fStream = new FileInputStream(path);
+    // Bitmap bmp = BitmapFactory.decodeStream(fStream);
+    // fStream.close();
+    
     double originalWidth = bmp.getWidth() * 1.0;
     double originalHeight = bmp.getHeight() * 1.0;
 
@@ -89,14 +94,16 @@ class ImageResizer {
     scaledBmp.compress(
         saveAsPNG ? Bitmap.CompressFormat.PNG : Bitmap.CompressFormat.JPEG, 100, outputStream);
 
+
     String[] pathParts = path.split("/");
     String imageName = pathParts[pathParts.length - 1];
-
     File imageFile = new File(externalFilesDirectory, "/scaled_" + imageName);
     FileOutputStream fileOutput = new FileOutputStream(imageFile);
     fileOutput.write(outputStream.toByteArray());
     fileOutput.close();
 
+    bmp.recycle();
+    
     return imageFile;
   }
 }
